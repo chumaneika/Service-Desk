@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: service-desk
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/service_desk_db
+    username: malik
+    password: 12345678
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
