@@ -50,4 +50,30 @@ public class RequestEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "review_owner")
     private ReviewOwner reviewOwner;
+
+    public void changeReviewOwner(ReviewOwner reviewOwner) {
+        this.reviewOwner = reviewOwner;
+    }
+
+    public void changeStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public void markAsActive() {
+        this.status = RequestStatus.CREATED;
+    }
+
+    public void assignCreator(UserEntity user) {
+        this.createdBy = user;
+    }
+
+    @PrePersist
+    public void markCreatedNow() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void markUpdatedNow() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

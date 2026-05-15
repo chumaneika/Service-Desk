@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Getter
 public class UserEntity {
 
@@ -34,11 +34,17 @@ public class UserEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
     @OneToMany(mappedBy = "user")
     private List<RequestEntity> requests;
 
     @Column(name = "number_phone", nullable = false, unique = true)
     private String numberPhone;
+
+    @OneToMany(mappedBy = "user")
+    private List<ReviewEntity> reviews;
 
     public UserEntity(String name, String surname, Role role, List<RequestEntity> requests, String numberPhone) {
         this.name = name;
@@ -56,7 +62,15 @@ public class UserEntity {
         this.surname = surname;
     }
 
+    public void changeRole(Role role) {
+        this.role = role;
+    }
+
     public void changeNumberPhone(String numberPhone) {
         this.numberPhone = numberPhone;
+    }
+
+    public void changePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }

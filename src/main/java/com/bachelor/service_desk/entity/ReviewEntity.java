@@ -48,4 +48,12 @@ public class ReviewEntity {
     public void changeDescription(String description) {
         this.description = description;
     }
+
+    public void assignCreator(UserEntity user) {
+        this.owner = user;
+    }
+
+    public void assignRequest(RequestEntity request) {
+        this.request = request;
+    }
 }
