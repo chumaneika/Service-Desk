@@ -10,6 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.HexFormat;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -34,6 +39,7 @@ public class UserService {
         user.changeSurname(dto.surname());
         user.changeRole(dto.role());
         user.changeNumberPhone(dto.numberPhone());
+        user.changeEnabled(true);
 
         String passwordHash = passwordEncoder.encode(dto.password());
 
@@ -52,5 +58,43 @@ public class UserService {
         user.changeSurname(dto.surname());
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    // Старший админ и система безопасности - поиск по ID
+    public UserEntity findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+    }
+
+    @Transactional
+    // Система безопасности - изменения токена переобновления
+    public void rotateRefreshToken(Long userId, String refreshToken, Instant refreshTokenExpiresAt) {
+        UserEntity user = findById(userId);
+        user.rotateRefreshToken(hashToken(refreshToken), refreshTokenExpiresAt);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    // Система безопасности - проверка валидации токена переобновления
+    public boolean isRefreshTokenValid(Long accountId, String refreshToken) {
+        UserEntity user = findById(accountId);
+        if (user.getRefreshTokenHash() == null || user.getRefreshTokenExpiresAt() == null) {
+            return false;
+        }
+        if (user.getRefreshTokenExpiresAt().isBefore(Instant.now())) {
+            return false;
+        }
+        return user.getRefreshTokenHash().equals(hashToken(refreshToken));
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(bytes);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to hash refresh token", e);
+        }
     }
 }

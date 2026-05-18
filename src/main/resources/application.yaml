@@ -15,3 +15,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+
+jwt:
+  # For production set JWT_SECRET env. Default value below is HEX-encoded 32-byte key.
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret-encoding: ${JWT_SECRET_ENCODING:hex}
+  expiration: ${JWT_EXPIRATION:900000} # 15 minutes in milliseconds
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds

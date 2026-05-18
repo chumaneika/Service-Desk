@@ -32,6 +32,7 @@ public class AdminInitializer {
                 admin.changeSurname("Admin");
                 admin.changeRole(Role.SUPER_ADMIN);
                 admin.changeNumberPhone("+10000000000");
+                admin.changeEnabled(true);
                 admin.changePassword(passwordEncoder.encode("admin09012005"));
 
                 userRepository.save(admin);

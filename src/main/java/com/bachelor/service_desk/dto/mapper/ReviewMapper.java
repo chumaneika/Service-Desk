@@ -1,12 +1,13 @@
 package com.bachelor.service_desk.dto.mapper;
 
-import com.bachelor.service_desk.dto.RequestCreateDTO;
 import com.bachelor.service_desk.dto.ReviewCreateDTO;
-import com.bachelor.service_desk.entity.RequestEntity;
 import com.bachelor.service_desk.entity.ReviewEntity;
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface ReviewMapper {
-    ReviewEntity toEntity(ReviewCreateDTO dto);
+@Component
+public class ReviewMapper {
+
+    public ReviewEntity toEntity(ReviewCreateDTO dto) {
+        return new ReviewEntity(dto.title(), dto.description(), null, null);
+    }
 }

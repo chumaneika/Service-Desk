@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
 
 
@@ -37,14 +38,23 @@ public class UserEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "createdBy")
     private List<RequestEntity> requests;
 
     @Column(name = "number_phone", nullable = false, unique = true)
     private String numberPhone;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "owner")
     private List<ReviewEntity> reviews;
+
+    @Column(name = "refresh_token_hash")
+    private String refreshTokenHash;
+
+    @Column(name = "refresh_token_expires_at")
+    private Instant refreshTokenExpiresAt;
+
+    @Column(name = "enabled")
+    private boolean enabled;
 
     public UserEntity(String name, String surname, Role role, List<RequestEntity> requests, String numberPhone) {
         this.name = name;
@@ -72,5 +82,14 @@ public class UserEntity {
 
     public void changePassword(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public void changeEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void rotateRefreshToken(String refreshTokenHash, Instant refreshTokenExpiresAt) {
+        this.refreshTokenHash = refreshTokenHash;
+        this.refreshTokenExpiresAt = refreshTokenExpiresAt;
     }
 }

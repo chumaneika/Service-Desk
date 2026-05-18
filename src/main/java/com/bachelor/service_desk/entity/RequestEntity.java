@@ -14,6 +14,11 @@ import java.time.LocalDateTime;
 @Getter
 public class RequestEntity {
 
+    public RequestEntity(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "request_seq")
     @SequenceGenerator(
