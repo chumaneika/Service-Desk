@@ -1,5 +1,6 @@
 package com.bachelor.service_desk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,10 +29,12 @@ public class ReviewEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
+    @JsonIgnore
     private UserEntity owner;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
+    @JsonIgnore
     private RequestEntity request;
 
     public ReviewEntity(String title, String description, UserEntity owner, RequestEntity request) {

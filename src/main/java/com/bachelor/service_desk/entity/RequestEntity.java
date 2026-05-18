@@ -1,5 +1,6 @@
 package com.bachelor.service_desk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,10 +41,12 @@ public class RequestEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
+    @JsonIgnore
     private UserEntity createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_id")
+    @JsonIgnore
     private UserEntity assignedTo;
 
     @Column(name = "created_at", nullable = false, updatable = false)

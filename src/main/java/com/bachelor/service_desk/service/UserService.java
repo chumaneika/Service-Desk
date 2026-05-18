@@ -28,9 +28,7 @@ public class UserService {
         boolean exists = userRepository.existsByNumberPhone(dto.numberPhone());
 
         if (exists) {
-            throw new IllegalArgumentException(
-                    "User with this phone number already exists"
-            );
+            throw new IllegalArgumentException("User with this phone number already exists");
         }
 
         UserEntity user = new UserEntity();

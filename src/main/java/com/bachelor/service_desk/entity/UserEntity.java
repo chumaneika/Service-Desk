@@ -1,5 +1,6 @@
 package com.bachelor.service_desk.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,21 +37,26 @@ public class UserEntity {
     private Role role;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @OneToMany(mappedBy = "createdBy")
+    @JsonIgnore
     private List<RequestEntity> requests;
 
     @Column(name = "number_phone", nullable = false, unique = true)
     private String numberPhone;
 
     @OneToMany(mappedBy = "owner")
+    @JsonIgnore
     private List<ReviewEntity> reviews;
 
     @Column(name = "refresh_token_hash")
+    @JsonIgnore
     private String refreshTokenHash;
 
     @Column(name = "refresh_token_expires_at")
+    @JsonIgnore
     private Instant refreshTokenExpiresAt;
 
     @Column(name = "enabled")
