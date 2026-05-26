@@ -2,6 +2,7 @@ package com.bachelor.service_desk.controller;
 
 import com.bachelor.service_desk.dto.UserCreateDTO;
 import com.bachelor.service_desk.dto.UserUpdateFullNameDTO;
+import com.bachelor.service_desk.entity.Role;
 import com.bachelor.service_desk.entity.UserEntity;
 import com.bachelor.service_desk.service.UserService;
 import jakarta.validation.Valid;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/users")
@@ -40,5 +43,11 @@ public class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserEntity> findById(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.findById(userId));
+    }
+
+    @GetMapping("/by-role/{role}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<List<UserEntity>> findAllByRole(@PathVariable Role role) {
+        return ResponseEntity.ok(userService.findAllByRole(role));
     }
 }

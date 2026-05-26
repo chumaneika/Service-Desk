@@ -1,5 +1,7 @@
 package com.bachelor.service_desk.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +22,9 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    public static final String JWT_ERROR_ATTR = "jwt_error";
+    public static final String JWT_ERROR_EXPIRED = "TOKEN_EXPIRED";
+    public static final String JWT_ERROR_INVALID = "TOKEN_INVALID";
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -46,8 +51,12 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+        } catch (ExpiredJwtException e) {
+            SecurityContextHolder.clearContext();
+            request.setAttribute(JWT_ERROR_ATTR, JWT_ERROR_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            SecurityContextHolder.clearContext();
+            request.setAttribute(JWT_ERROR_ATTR, JWT_ERROR_INVALID);
         }
 
         filterChain.doFilter(request, response);

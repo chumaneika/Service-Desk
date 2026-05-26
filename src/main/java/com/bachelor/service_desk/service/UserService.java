@@ -2,6 +2,7 @@ package com.bachelor.service_desk.service;
 
 import com.bachelor.service_desk.dto.UserCreateDTO;
 import com.bachelor.service_desk.dto.UserUpdateFullNameDTO;
+import com.bachelor.service_desk.entity.Role;
 import com.bachelor.service_desk.entity.UserEntity;
 import com.bachelor.service_desk.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +65,15 @@ public class UserService {
     public UserEntity findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+    }
+
+    @Transactional
+    // Старший админ - получение пользователей по роли (только ADMIN или USER)
+    public List<UserEntity> findAllByRole(Role role) {
+        if (role != Role.ADMIN && role != Role.USER) {
+            throw new IllegalArgumentException("Role must be ADMIN or USER");
+        }
+        return userRepository.findAllByRole(role);
     }
 
     @Transactional
