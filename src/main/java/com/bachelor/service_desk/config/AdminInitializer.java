@@ -29,7 +29,7 @@ public class AdminInitializer {
                 UserEntity admin = new UserEntity();
 
                 admin.changeName("Malik");
-                admin.changeSurname("Admin");
+                admin.changeSurname("Аликберов");
                 admin.changeRole(Role.SUPER_ADMIN);
                 admin.changeNumberPhone("+10000000000");
                 admin.changeEnabled(true);

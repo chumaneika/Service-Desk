@@ -34,7 +34,7 @@ public class UserController {
     }
 
     @PutMapping("/full-name")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserEntity> updateFullName(@RequestBody @Valid UserUpdateFullNameDTO dto) {
         return ResponseEntity.ok(userService.updateFullName(dto));
     }
