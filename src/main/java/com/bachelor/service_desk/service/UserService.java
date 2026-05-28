@@ -97,6 +97,13 @@ public class UserService {
         return user.getRefreshTokenHash().equals(hashToken(refreshToken));
     }
 
+    @Transactional
+    public List<UserEntity> findAllUsers() {
+        return userRepository.findAll().stream()
+                .filter(x -> x.getRole() != Role.SUPER_ADMIN)
+                .toList();
+    }
+
     private String hashToken(String token) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

@@ -50,4 +50,10 @@ public class UserController {
     public ResponseEntity<List<UserEntity>> findAllByRole(@PathVariable Role role) {
         return ResponseEntity.ok(userService.findAllByRole(role));
     }
+
+    @GetMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<List<UserEntity>> findAllUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
+    }
 }
