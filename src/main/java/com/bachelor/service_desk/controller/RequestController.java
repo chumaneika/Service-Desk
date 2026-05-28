@@ -2,6 +2,7 @@ package com.bachelor.service_desk.controller;
 
 import com.bachelor.service_desk.dto.RequestCreateDTO;
 import com.bachelor.service_desk.entity.RequestEntity;
+import com.bachelor.service_desk.entity.RequestStatus;
 import com.bachelor.service_desk.service.RequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +34,11 @@ public class RequestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(requestService.createRequest(dto));
     }
 
-    @GetMapping("/by-user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<List<RequestEntity>> getRequestsByUser(@PathVariable Long userId) throws AccessDeniedException {
-        return ResponseEntity.ok(requestService.getRequestsByUser(userId));
-    }
+//    @GetMapping("/by-user/{userId}")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+//    public ResponseEntity<List<RequestEntity>> getRequestsByUser(@PathVariable Long userId) throws AccessDeniedException {
+//        return ResponseEntity.ok(requestService.getRequestsByUser(userId));
+//    }
 
     @GetMapping("/by-responsible/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
@@ -68,5 +69,20 @@ public class RequestController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<RequestEntity> findById(@PathVariable Long requestId) {
         return ResponseEntity.ok(requestService.findById(requestId));
+    }
+
+    @GetMapping("/by-status/{userId}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<List<RequestEntity>> findAllRequestsByStatus(
+            @PathVariable Long userId,
+            @RequestParam(required = false) RequestStatus status
+    ) {
+        return ResponseEntity.ok(requestService.findAllRequestsByStatus(userId, status));
+    }
+
+    @GetMapping("/by-user/{userId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<List<RequestEntity>> findAllRequestsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(requestService.findAllRequestsByUser(userId));
     }
 }

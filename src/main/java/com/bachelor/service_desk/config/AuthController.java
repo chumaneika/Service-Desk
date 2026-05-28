@@ -58,8 +58,8 @@ public class AuthController {
                 refreshToken,
                 userDetails.getId(),
                 userDetails.getUsername(),
-                null,
-                null
+                userDetails.getName(),
+                userDetails.getSurname()
         ));
     }
 
@@ -90,8 +90,8 @@ public class AuthController {
                 newRefreshToken,
                 details.getId(),
                 details.getUsername(),
-                null,
-                null
+                details.getName(),
+                details.getSurname()
         ));
     }
 }

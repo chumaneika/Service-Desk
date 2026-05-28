@@ -17,6 +17,8 @@ public class UserDetailsImpl implements UserDetails {
 
     private Long id;
     private String numberPhone;
+    private String name;
+    private String surname;
     private String password;
     private Role role;
     private boolean enabled;
@@ -30,6 +32,8 @@ public class UserDetailsImpl implements UserDetails {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getNumberPhone(),
+                user.getName(),
+                user.getSurname(),
                 user.getPasswordHash(),
                 user.getRole(),
                 user.isEnabled(),

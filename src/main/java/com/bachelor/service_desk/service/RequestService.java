@@ -94,7 +94,7 @@ public class RequestService {
     // Пользователь - оставить отзыв о выполненной работе
     public void leaveFeedback(Long requestId, String feedback) {
         RequestEntity request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Request is not found"));
 
         ReviewOwner reviewOwner;
 
@@ -116,4 +116,28 @@ public class RequestService {
                 .orElseThrow(() -> new EntityNotFoundException("User is not found"));
     }
 
+    public List<RequestEntity> findAllRequestsByStatus(Long userId, RequestStatus status) {
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+
+        if (status == null) {
+            return requestRepository.findAllByCreatedBy(user);
+        } else if (status == RequestStatus.IN_PROGRESS) {
+            return requestRepository.findAllByStatus(RequestStatus.IN_PROGRESS);
+        } else if (status == RequestStatus.COMPLETED) {
+            return requestRepository.findAllByStatus(RequestStatus.COMPLETED);
+        } else {
+            throw new IllegalArgumentException("Invalid request status");
+        }
+
+        // todo нужно отрегулировать права запроса на получение заявок определенного статуса
+    }
+
+    public List<RequestEntity> findAllRequestsByUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+
+        return requestRepository.findAllByCreatedBy(user);
+    }
 }
