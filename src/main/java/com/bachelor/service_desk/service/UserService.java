@@ -68,6 +68,17 @@ public class UserService {
     }
 
     @Transactional
+    public UserEntity findByNumberPhone(String numberPhone) {
+        return userRepository.findByNumberPhone(numberPhone)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+    }
+
+    @Transactional
+    public List<UserEntity> searchUsers(String search) {
+        return userRepository.searchByFullName(search.trim());
+    }
+
+    @Transactional
     // Старший админ - получение пользователей по роли (только ADMIN или USER)
     public List<UserEntity> findAllByRole(Role role) {
         if (role != Role.ADMIN && role != Role.USER) {

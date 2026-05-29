@@ -10,13 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,10 +33,22 @@ public class UserController {
         return ResponseEntity.ok(userService.updateFullName(dto));
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/id/{userId}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserEntity> findById(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.findById(userId));
+    }
+
+    @GetMapping("/numberPhone/{numberPhone}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<UserEntity> findByNumberPhone(@PathVariable String numberPhone) {
+        return ResponseEntity.ok(userService.findByNumberPhone(numberPhone));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<List<UserEntity>> searchUsers(@RequestParam String search) {
+        return ResponseEntity.ok(userService.searchUsers(search));
     }
 
     @GetMapping("/by-role/{role}")
