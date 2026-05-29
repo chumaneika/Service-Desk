@@ -2,6 +2,7 @@ package com.bachelor.service_desk.controller;
 
 import com.bachelor.service_desk.dto.ReviewCreateDTO;
 import com.bachelor.service_desk.entity.ReviewEntity;
+import com.bachelor.service_desk.entity.ReviewOwner;
 import com.bachelor.service_desk.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,10 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PostMapping
+    @PostMapping("/{reviewOwner}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReviewEntity> createReview(@RequestBody @Valid ReviewCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(dto));
+    public ResponseEntity<ReviewEntity> createReview(@RequestBody @Valid ReviewCreateDTO dto, @PathVariable ReviewOwner reviewOwner) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(dto, reviewOwner));
     }
 
     @GetMapping
@@ -37,7 +38,7 @@ public class ReviewController {
     }
 
     @GetMapping("/owner/{ownerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<List<ReviewEntity>> getReviewsByOwner(@PathVariable Long ownerId) {
         return ResponseEntity.ok(reviewService.getReviewsByOwner(ownerId));
     }

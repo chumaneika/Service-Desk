@@ -1,5 +1,6 @@
 package com.bachelor.service_desk.dto;
 
+import com.bachelor.service_desk.entity.ReviewOwner;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

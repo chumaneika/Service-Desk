@@ -4,6 +4,7 @@ import com.bachelor.service_desk.dto.ReviewCreateDTO;
 import com.bachelor.service_desk.dto.mapper.ReviewMapper;
 import com.bachelor.service_desk.entity.RequestEntity;
 import com.bachelor.service_desk.entity.ReviewEntity;
+import com.bachelor.service_desk.entity.ReviewOwner;
 import com.bachelor.service_desk.entity.UserEntity;
 import com.bachelor.service_desk.repository.RequestRepository;
 import com.bachelor.service_desk.repository.ReviewRepository;
@@ -26,13 +27,18 @@ public class ReviewService {
 
     @Transactional
     // Пользователь - оставить отзыв
-    public ReviewEntity createReview(ReviewCreateDTO dto) {
+    public ReviewEntity createReview(ReviewCreateDTO dto, ReviewOwner reviewOwner) {
+        if (reviewRepository.existsByRequestId(dto.request())) {
+            throw new IllegalArgumentException("Review for this request already exists");
+        }
+
         UserEntity user = userRepository.findById(dto.owner())
                 .orElseThrow(() -> new EntityNotFoundException("User is not found"));
 
         RequestEntity request = requestRepository.findById(dto.request())
                 .orElseThrow(() -> new EntityNotFoundException("Request is not found"));
 
+        request.changeReviewOwner(reviewOwner);
         ReviewEntity review = reviewMapper.toEntity(dto);
         review.assignCreator(user);
         review.assignRequest(request);
