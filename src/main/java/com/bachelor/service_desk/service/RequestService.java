@@ -47,7 +47,7 @@ public class RequestService {
             throw new AccessDeniedException("Only users can access their requests");
         }
 
-        return user.getRequests();
+        return user.getCreatedRequests();
     }
 
     @Transactional
@@ -60,7 +60,7 @@ public class RequestService {
             throw new AccessDeniedException("Users cannot access their requests");
         }
 
-        return user.getRequests();
+        return user.getResponsibleRequests();
     }
 
     // Админ и старший админ - Поиск задач со статусом СОЗДАНО
@@ -78,6 +78,10 @@ public class RequestService {
         RequestEntity request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
 
+        if (request.getStatus() == RequestStatus.COMPLETED || request.getStatus() == RequestStatus.FAILED) {
+            throw new IllegalStateException("Cannot change status of completed or failed request");
+        }
+
         RequestStatus requestStatus;
 
         try {
@@ -87,6 +91,23 @@ public class RequestService {
         }
 
         request.changeStatus(requestStatus);
+        return requestRepository.save(request);
+    }
+
+    @Transactional
+    // Админ - назначение исполнителя на заявку
+    public RequestEntity assignResponsible(Long requestId, Long userId) {
+        RequestEntity request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new IllegalStateException("Responsible user must have ADMIN role");
+        }
+
+        request.assignResponsibility(user);
         return requestRepository.save(request);
     }
 
@@ -113,7 +134,7 @@ public class RequestService {
     // Админ, старший админ и пользователь со своими заявками
     public RequestEntity findById(Long requestId) {
         return requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Request is not found"));
     }
 
     public List<RequestEntity> findAllRequestsByStatus(Long userId, RequestStatus status) {

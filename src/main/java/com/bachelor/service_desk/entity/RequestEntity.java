@@ -1,12 +1,10 @@
 package com.bachelor.service_desk.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,15 +37,13 @@ public class RequestEntity {
     @Column(name = "status", nullable = false)
     private RequestStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = false)
-    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
     private UserEntity createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_to_id")
-    @JsonIgnore
-    private UserEntity assignedTo;
+    @ManyToOne
+    @JoinColumn(name = "responsible_id")
+    private UserEntity responsible;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -73,6 +69,10 @@ public class RequestEntity {
 
     public void assignCreator(UserEntity user) {
         this.createdBy = user;
+    }
+
+    public void assignResponsibility(UserEntity user) {
+        this.responsible = user;
     }
 
     @PrePersist

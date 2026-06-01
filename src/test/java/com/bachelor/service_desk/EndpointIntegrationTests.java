@@ -168,6 +168,42 @@ class EndpointIntegrationTests {
     }
 
     @Test
+    void adminCanAssignAdminAsResponsibleForRequest() throws Exception {
+        RequestEntity request = saveRequest(user, "Network issue", "Wi-Fi is unstable");
+
+        mockMvc.perform(patch("/api/requests/{requestId}/responsible/{userId}", request.getId(), admin.getId())
+                        .header("Authorization", bearerFor(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(request.getId()))
+                .andExpect(jsonPath("$.responsible.id").value(admin.getId()))
+                .andExpect(jsonPath("$.responsible.role").value("ADMIN"));
+
+        assertThat(requestRepository.findById(request.getId()))
+                .get()
+                .extracting(savedRequest -> savedRequest.getResponsible().getId())
+                .isEqualTo(admin.getId());
+    }
+
+    @Test
+    void assigningNonAdminAsResponsibleReturnsConflict() throws Exception {
+        RequestEntity request = saveRequest(user, "Laptop issue", "Battery drains quickly");
+
+        mockMvc.perform(patch("/api/requests/{requestId}/responsible/{userId}", request.getId(), user.getId())
+                        .header("Authorization", bearerFor(admin)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Responsible user must have ADMIN role"));
+    }
+
+    @Test
+    void superAdminCannotAssignResponsibleForRequest() throws Exception {
+        RequestEntity request = saveRequest(user, "Account issue", "Cannot reset password");
+
+        mockMvc.perform(patch("/api/requests/{requestId}/responsible/{userId}", request.getId(), admin.getId())
+                        .header("Authorization", bearerFor(superAdmin)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void invalidRequestStatusReturnsBadRequest() throws Exception {
         RequestEntity request = saveRequest(user, "Monitor problem", "Monitor flickers");
 
@@ -176,6 +212,42 @@ class EndpointIntegrationTests {
                         .param("status", "UNKNOWN"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Invalid request status"));
+    }
+
+    @Test
+    void cannotChangeCompletedRequestStatus() throws Exception {
+        RequestEntity request = saveRequest(user, "Finished task", "Everything is done");
+        request.changeStatus(RequestStatus.COMPLETED);
+        requestRepository.save(request);
+
+        mockMvc.perform(patch("/api/requests/{requestId}/status", request.getId())
+                        .header("Authorization", bearerFor(admin))
+                        .param("status", "IN_PROGRESS"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Cannot change status of completed or failed request"));
+
+        assertThat(requestRepository.findById(request.getId()))
+                .get()
+                .extracting(RequestEntity::getStatus)
+                .isEqualTo(RequestStatus.COMPLETED);
+    }
+
+    @Test
+    void cannotChangeFailedRequestStatus() throws Exception {
+        RequestEntity request = saveRequest(user, "Failed task", "Could not be completed");
+        request.changeStatus(RequestStatus.FAILED);
+        requestRepository.save(request);
+
+        mockMvc.perform(patch("/api/requests/{requestId}/status", request.getId())
+                        .header("Authorization", bearerFor(admin))
+                        .param("status", "IN_PROGRESS"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Cannot change status of completed or failed request"));
+
+        assertThat(requestRepository.findById(request.getId()))
+                .get()
+                .extracting(RequestEntity::getStatus)
+                .isEqualTo(RequestStatus.FAILED);
     }
 
     @Test

@@ -58,6 +58,12 @@ public class RequestController {
         return ResponseEntity.ok(requestService.changeStatus(requestId, status));
     }
 
+    @PatchMapping("/{requestId}/responsible/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RequestEntity> assignResponsible(@PathVariable Long requestId, @PathVariable Long userId) {
+        return ResponseEntity.ok(requestService.assignResponsible(requestId, userId));
+    }
+
     @PatchMapping("/{requestId}/feedback")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> leaveFeedback(@PathVariable Long requestId, @RequestParam String feedback) {

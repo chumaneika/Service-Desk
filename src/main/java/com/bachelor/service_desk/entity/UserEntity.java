@@ -2,11 +2,11 @@ package com.bachelor.service_desk.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -42,7 +42,11 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "createdBy")
     @JsonIgnore
-    private List<RequestEntity> requests;
+    private List<RequestEntity> createdRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "responsible")
+    @JsonIgnore
+    private List<RequestEntity> responsibleRequests = new ArrayList<>();
 
     @Column(name = "number_phone", nullable = false, unique = true)
     private String numberPhone;
@@ -66,8 +70,20 @@ public class UserEntity {
         this.name = name;
         this.surname = surname;
         this.role = role;
-        this.requests = requests;
+        assignRequestsByRole(role, requests);
         this.numberPhone = numberPhone;
+    }
+
+    private void assignRequestsByRole(Role role, List<RequestEntity> requests) {
+        if (requests == null) {
+            return;
+        }
+
+        if (role == Role.USER) {
+            this.createdRequests = requests;
+        } else if (role == Role.ADMIN) {
+            this.responsibleRequests = requests;
+        }
     }
 
     public void changeName(String name) {
