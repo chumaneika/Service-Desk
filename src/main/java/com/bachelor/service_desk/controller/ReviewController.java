@@ -42,4 +42,10 @@ public class ReviewController {
     public ResponseEntity<List<ReviewEntity>> getReviewsByOwner(@PathVariable Long ownerId) {
         return ResponseEntity.ok(reviewService.getReviewsByOwner(ownerId));
     }
+
+    @GetMapping("/{reviewId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<ReviewEntity> findById(Long reviewId) {
+        return ResponseEntity.ok(reviewService.findById(reviewId));
+    }
 }

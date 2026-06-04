@@ -47,6 +47,12 @@ public class ReviewService {
     }
 
     @Transactional
+    public ReviewEntity findById(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review is not found"));
+    }
+
+    @Transactional
     // Админ и старший админ - просмотр всех отзывов
     public List<ReviewEntity> getAllReviews() {
         return reviewRepository.findAll();

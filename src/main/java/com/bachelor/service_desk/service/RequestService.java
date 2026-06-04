@@ -78,8 +78,8 @@ public class RequestService {
         RequestEntity request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
 
-        if (request.getStatus() == RequestStatus.COMPLETED || request.getStatus() == RequestStatus.FAILED) {
-            throw new IllegalStateException("Cannot change status of completed or failed request");
+        if (request.getStatus() == RequestStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot change status of completed request");
         }
 
         RequestStatus requestStatus;

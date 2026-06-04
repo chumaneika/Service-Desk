@@ -222,32 +222,14 @@ class EndpointIntegrationTests {
 
         mockMvc.perform(patch("/api/requests/{requestId}/status", request.getId())
                         .header("Authorization", bearerFor(admin))
-                        .param("status", "IN_PROGRESS"))
+                .param("status", "IN_PROGRESS"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Cannot change status of completed or failed request"));
+                .andExpect(jsonPath("$.message").value("Cannot change status of completed request"));
 
         assertThat(requestRepository.findById(request.getId()))
                 .get()
                 .extracting(RequestEntity::getStatus)
                 .isEqualTo(RequestStatus.COMPLETED);
-    }
-
-    @Test
-    void cannotChangeFailedRequestStatus() throws Exception {
-        RequestEntity request = saveRequest(user, "Failed task", "Could not be completed");
-        request.changeStatus(RequestStatus.FAILED);
-        requestRepository.save(request);
-
-        mockMvc.perform(patch("/api/requests/{requestId}/status", request.getId())
-                        .header("Authorization", bearerFor(admin))
-                        .param("status", "IN_PROGRESS"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Cannot change status of completed or failed request"));
-
-        assertThat(requestRepository.findById(request.getId()))
-                .get()
-                .extracting(RequestEntity::getStatus)
-                .isEqualTo(RequestStatus.FAILED);
     }
 
     @Test

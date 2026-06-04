@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum RequestStatus {
     CREATED("Новый запрос"),
     IN_PROGRESS("В процессе выполнения"),
-    COMPLETED("Выполнен"),
-    FAILED("Запрос не выполнен");
+    COMPLETED("Выполнен");
 
     private final String displayName;
 }
