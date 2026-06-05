@@ -1,6 +1,7 @@
 package com.bachelor.service_desk.controller;
 
 import com.bachelor.service_desk.dto.ReviewCreateDTO;
+import com.bachelor.service_desk.dto.ReviewResponseDTO;
 import com.bachelor.service_desk.entity.ReviewEntity;
 import com.bachelor.service_desk.entity.ReviewOwner;
 import com.bachelor.service_desk.service.ReviewService;
@@ -27,13 +28,13 @@ public class ReviewController {
 
     @PostMapping("/{reviewOwner}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReviewEntity> createReview(@RequestBody @Valid ReviewCreateDTO dto, @PathVariable ReviewOwner reviewOwner) {
+    public ResponseEntity<ReviewResponseDTO> createReview(@RequestBody @Valid ReviewCreateDTO dto, @PathVariable ReviewOwner reviewOwner) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(dto, reviewOwner));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<List<ReviewEntity>> getAllReviews() {
+    public ResponseEntity<List<ReviewResponseDTO>> getAllReviews() {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
 

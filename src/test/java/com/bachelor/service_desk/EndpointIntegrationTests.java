@@ -249,7 +249,9 @@ class EndpointIntegrationTests {
                                 """.formatted(user.getId(), request.getId())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.title").value("Great work"));
+                .andExpect(jsonPath("$.title").value("Great work"))
+                .andExpect(jsonPath("$.ownerId").value(user.getId()))
+                .andExpect(jsonPath("$.requestId").value(request.getId()));
 
         assertThat(reviewRepository.existsByRequestId(request.getId())).isTrue();
     }
@@ -272,6 +274,20 @@ class EndpointIntegrationTests {
                                 """.formatted(user.getId(), request.getId())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Review for this request already exists"));
+    }
+
+    @Test
+    void adminCanGetReviewsWithOwnerAndRequestIds() throws Exception {
+        RequestEntity request = saveRequest(user, "Headset replacement", "Microphone does not work");
+        createReview(request);
+
+        mockMvc.perform(get("/api/reviews")
+                        .header("Authorization", bearerFor(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").isNumber())
+                .andExpect(jsonPath("$[0].title").value("Initial review"))
+                .andExpect(jsonPath("$[0].ownerId").value(user.getId()))
+                .andExpect(jsonPath("$[0].requestId").value(request.getId()));
     }
 
     @Test

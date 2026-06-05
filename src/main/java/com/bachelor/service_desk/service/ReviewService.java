@@ -1,6 +1,7 @@
 package com.bachelor.service_desk.service;
 
 import com.bachelor.service_desk.dto.ReviewCreateDTO;
+import com.bachelor.service_desk.dto.ReviewResponseDTO;
 import com.bachelor.service_desk.dto.mapper.ReviewMapper;
 import com.bachelor.service_desk.entity.RequestEntity;
 import com.bachelor.service_desk.entity.ReviewEntity;
@@ -27,7 +28,7 @@ public class ReviewService {
 
     @Transactional
     // Пользователь - оставить отзыв
-    public ReviewEntity createReview(ReviewCreateDTO dto, ReviewOwner reviewOwner) {
+    public ReviewResponseDTO createReview(ReviewCreateDTO dto, ReviewOwner reviewOwner) {
         if (reviewRepository.existsByRequestId(dto.request())) {
             throw new IllegalArgumentException("Review for this request already exists");
         }
@@ -43,7 +44,7 @@ public class ReviewService {
         review.assignCreator(user);
         review.assignRequest(request);
 
-        return reviewRepository.save(review);
+        return reviewMapper.toDto(reviewRepository.save(review));
     }
 
     @Transactional
@@ -54,8 +55,10 @@ public class ReviewService {
 
     @Transactional
     // Админ и старший админ - просмотр всех отзывов
-    public List<ReviewEntity> getAllReviews() {
-        return reviewRepository.findAll();
+    public List<ReviewResponseDTO> getAllReviews() {
+        return reviewRepository.findAll().stream()
+                .map(reviewMapper::toDto)
+                .toList();
     }
 
     @Transactional
