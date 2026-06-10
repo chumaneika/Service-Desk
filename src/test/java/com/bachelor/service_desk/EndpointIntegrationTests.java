@@ -97,6 +97,26 @@ class EndpointIntegrationTests {
     }
 
     @Test
+    void loginPreflightAllowsLocalFrontend() throws Exception {
+        mockMvc.perform(options("/api/auth/login")
+                        .header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(header().string("Access-Control-Allow-Credentials", "true"));
+    }
+
+    @Test
+    void loginPreflightDoesNotAllowRailwayOrigin() throws Exception {
+        mockMvc.perform(options("/api/auth/login")
+                        .header("Origin", "https://railway.com")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void usersEndpointRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isUnauthorized())

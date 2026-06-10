@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,18 +23,16 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${app.cors.allowed-origins:}")
-    private String allowedOrigins;
+    private static final String LOCAL_FRONTEND_URL = "http://localhost:5173";
 
-    @Value("${app.cors.allowed-origin-patterns:}")
-    private String allowedOriginPatterns;
+    @Value("${FRONTEND_URL:https://service-desk-frontend-iota.vercel.app}")
+    private String frontendUrl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -52,7 +51,7 @@ public class SecurityConfig {
             CustomAuthenticationProvider customAuthenticationProvider
     ) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
@@ -80,18 +79,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        List<String> origins = splitCorsValues(allowedOrigins);
-        List<String> originPatterns = splitCorsValues(allowedOriginPatterns);
-
-        if (!origins.isEmpty()) {
-            configuration.setAllowedOrigins(origins);
-        }
-
-        if (!originPatterns.isEmpty()) {
-            configuration.setAllowedOriginPatterns(originPatterns);
-        }
-
+        configuration.setAllowedOrigins(allowedCorsOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -102,14 +90,11 @@ public class SecurityConfig {
         return source;
     }
 
-    private List<String> splitCorsValues(String value) {
-        if (!StringUtils.hasText(value)) {
-            return List.of();
+    private List<String> allowedCorsOrigins() {
+        if (!StringUtils.hasText(frontendUrl) || LOCAL_FRONTEND_URL.equals(frontendUrl.trim())) {
+            return List.of(LOCAL_FRONTEND_URL);
         }
 
-        return Arrays.stream(value.split(","))
-                .map(String::trim)
-                .filter(StringUtils::hasText)
-                .toList();
+        return List.of(frontendUrl.trim(), LOCAL_FRONTEND_URL);
     }
 }
