@@ -23,16 +23,32 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String LOCAL_FRONTEND_URL = "http://localhost:5173";
+    private static final List<String> DEFAULT_FRONTEND_ORIGINS = List.of(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5174",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://service-desk-frontend-iota.vercel.app"
+    );
 
     @Value("${FRONTEND_URL:https://service-desk-frontend-iota.vercel.app}")
     private String frontendUrl;
+
+    @Value("${app.cors.allowed-origins:${CORS_ALLOWED_ORIGINS:}}")
+    private String allowedOrigins;
+
+    @Value("${app.cors.allowed-origin-patterns:${CORS_ALLOWED_ORIGIN_PATTERNS:https://*.vercel.app}}")
+    private String allowedOriginPatterns;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -80,6 +96,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(allowedCorsOrigins());
+        configuration.setAllowedOriginPatterns(allowedCorsOriginPatterns());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -91,10 +108,51 @@ public class SecurityConfig {
     }
 
     private List<String> allowedCorsOrigins() {
-        if (!StringUtils.hasText(frontendUrl) || LOCAL_FRONTEND_URL.equals(frontendUrl.trim())) {
-            return List.of(LOCAL_FRONTEND_URL);
+        List<String> origins = new ArrayList<>(DEFAULT_FRONTEND_ORIGINS);
+        origins.addAll(splitCorsValues(frontendUrl).stream()
+                .filter(origin -> !origin.contains("*"))
+                .toList());
+        origins.addAll(splitCorsValues(allowedOrigins).stream()
+                .filter(origin -> !origin.contains("*"))
+                .toList());
+
+        return origins.stream()
+                .distinct()
+                .toList();
+    }
+
+    private List<String> allowedCorsOriginPatterns() {
+        List<String> patterns = new ArrayList<>();
+        patterns.addAll(splitCorsValues(allowedOriginPatterns));
+        patterns.addAll(splitCorsValues(frontendUrl).stream()
+                .filter(origin -> origin.contains("*"))
+                .toList());
+        patterns.addAll(splitCorsValues(allowedOrigins).stream()
+                .filter(origin -> origin.contains("*"))
+                .toList());
+
+        return patterns.stream()
+                .distinct()
+                .toList();
+    }
+
+    private List<String> splitCorsValues(String value) {
+        if (!StringUtils.hasText(value)) {
+            return List.of();
         }
 
-        return List.of(frontendUrl.trim(), LOCAL_FRONTEND_URL);
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .map(this::removeTrailingSlash)
+                .toList();
+    }
+
+    private String removeTrailingSlash(String value) {
+        if (value.length() > 1 && value.endsWith("/")) {
+            return value.substring(0, value.length() - 1);
+        }
+
+        return value;
     }
 }

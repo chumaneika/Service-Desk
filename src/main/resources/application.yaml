@@ -24,3 +24,8 @@ jwt:
   secret-encoding: ${JWT_SECRET_ENCODING:hex}
   expiration: ${JWT_EXPIRATION:900000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+app:
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:}"
+    allowed-origin-patterns: "${CORS_ALLOWED_ORIGIN_PATTERNS:https://*.vercel.app}"
