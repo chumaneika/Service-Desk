@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
@@ -173,13 +174,32 @@ public class JwtService {
         }
 
         return switch (secretEncoding.toLowerCase()) {
+            case "auto" -> decodeAutoSecret();
             case "hex" -> decodeHexSecret();
             case "base64" -> Base64.getDecoder().decode(secret);
-            case "plain" -> secret.getBytes(StandardCharsets.UTF_8);
+            case "plain", "raw" -> secret.getBytes(StandardCharsets.UTF_8);
             default -> throw new IllegalArgumentException(
-                    "Unsupported jwt.secret-encoding: " + secretEncoding + ". Use plain, hex or base64"
+                    "Unsupported jwt.secret-encoding: " + secretEncoding + ". Use auto, plain, raw, hex or base64"
             );
         };
+    }
+
+    private byte[] decodeAutoSecret() {
+        if (looksLikeHex(secret)) {
+            return decodeHexSecret();
+        }
+
+        byte[] base64Bytes = tryDecodeBase64(secret, Base64.getDecoder());
+        if (base64Bytes != null) {
+            return base64Bytes;
+        }
+
+        byte[] base64UrlBytes = tryDecodeBase64(secret, Base64.getUrlDecoder());
+        if (base64UrlBytes != null) {
+            return base64UrlBytes;
+        }
+
+        return secret.getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] decodeHexSecret() {
@@ -187,6 +207,19 @@ public class JwtService {
             return HexFormat.of().parseHex(secret);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("jwt.secret is not valid hex", ex);
+        }
+    }
+
+    private boolean looksLikeHex(String value) {
+        return value.length() % 2 == 0 && value.matches("[0-9a-fA-F]+");
+    }
+
+    private byte[] tryDecodeBase64(String value, Decoder decoder) {
+        try {
+            byte[] decoded = decoder.decode(value);
+            return decoded.length >= 32 ? decoded : null;
+        } catch (IllegalArgumentException ex) {
+            return null;
         }
     }
 }
