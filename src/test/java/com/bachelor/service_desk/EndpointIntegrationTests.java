@@ -291,6 +291,19 @@ class EndpointIntegrationTests {
     }
 
     @Test
+    void userCanGetReviewById() throws Exception {
+        RequestEntity request = saveRequest(user, "Camera issue", "Laptop camera is blurry");
+        createReview(request);
+        Long reviewId = reviewRepository.findAll().get(0).getId();
+
+        mockMvc.perform(get("/api/reviews/{reviewId}", reviewId)
+                        .header("Authorization", bearerFor(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(reviewId))
+                .andExpect(jsonPath("$.title").value("Initial review"));
+    }
+
+    @Test
     void superAdminCanSearchUsers() throws Exception {
         mockMvc.perform(get("/api/users/search")
                         .header("Authorization", bearerFor(superAdmin))

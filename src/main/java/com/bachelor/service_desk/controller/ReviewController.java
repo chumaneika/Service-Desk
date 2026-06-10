@@ -46,7 +46,7 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<ReviewEntity> findById(Long reviewId) {
+    public ResponseEntity<ReviewEntity> findById(@PathVariable Long reviewId) {
         return ResponseEntity.ok(reviewService.findById(reviewId));
     }
 }
